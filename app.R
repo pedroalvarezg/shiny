@@ -8,92 +8,41 @@
 #
 
 library(shiny)
-library(shinythemes)
-library(datasets)
-library(ggplot2)
-require(gridExtra)
-library(fpp2)
-library(shinyWidgets)
-library(shinyjs)
-library(shinydashboard)
-library(TSA)
-library(tseries)
-library(forecast)
-library(openxlsx)
-library(tidyverse)
-library(lubridate)
-library(fpp2)
-library(plotly)
-library(autoplotly)
-library(vroom)
-library(highcharter)
-source("Prediction.R")
 
+# Define UI for application that draws a histogram
+ui <- fluidPage(
 
-########################################
+    # Application title
+    titlePanel("Old Faithful Geyser Data"),
 
-########################################
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("bins",
+                        "Number of bins:",
+                        min = 1,
+                        max = 50,
+                        value = 30)
+        ),
 
-# Define UI for application 
-ui <- dashboardPage(title = "Sales Projection",skin = "red",
-  dashboardHeader(title = "Projections"
-  ),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem(text = "Sales Projections", tabName  = "ventas", icon = icon("credit-card")),
-      menuItem(text = "Expenses Projections", tabName  = "expenses",icon = icon("sack-dollar")),
-      menuItem(text = "Revenue", tabName = "revenue", icon = icon("money-bill-trend-up"))
+        # Show a plot of the generated distribution
+        mainPanel(
+           plotOutput("distPlot")
+        )
     )
-  ),
-  dashboardBody(
-    tabItems(tabItem(tabName = "ventas",
-                     fluidRow(
-                       column(width = 11,
-                              valueBox(value = .0203 %>% scales::percent(),
-                                      subtitle = "Porcentaje",
-                                      icon = icon("percent")),
-                              valueBox(value = .0203 %>% scales::percent(),
-                                       subtitle = "Porcentaje",
-                                       icon = icon("percent"),
-                                       color = "olive"),
-                              valueBox(value = .0203 %>% scales::percent(),
-                                       subtitle = "Porcentaje",
-                                       icon = icon("percent"),
-                                       color = "navy")
-                         
-                       )
-                     ),
-            fluidRow(column(width = 11, plotlyOutput("ventas")))
-             ),
-      tabItem(tabName = "expenses",
-              fluidRow(
-                column(width = 11,
-                       valueBox(value = .0203 %>% scales::percent(),
-                                subtitle = "Porcentaje",
-                                icon = icon("percent")),
-                       valueBox(value = .0203 %>% scales::percent(),
-                                subtitle = "Porcentaje",
-                                icon = icon("percent")),
-                       valueBox(value = .0203 %>% scales::percent(),
-                                subtitle = "Porcentaje",
-                                icon = icon("percent"))
-                       
-                )
-              ),
-              fluidRow(column(width = 11, plotlyOutput("expenses")))
-        
-      ),
-      tabItem(tabName = "revenue",
-              plotlyOutput("revenue"))
-    )
-  )
 )
-  
-# Define server 
-server <- function(input, output,session) {
-  output$ventas <- renderPlotly(ventas)
-  output$expenses <- renderPlotly(plot.inicial)
-  output$revenue <- renderPlotly(plot.inicial)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+    output$distPlot <- renderPlot({
+        # generate bins based on input$bins from ui.R
+        x    <- faithful[, 2]
+        bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+        # draw the histogram with the specified number of bins
+        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+    })
 }
 
 # Run the application 
